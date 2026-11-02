@@ -169,6 +169,10 @@ function Stamp({ color, label, dashed }) {
   );
 }
 
+function slipKey(bot, text) {
+  return `${bot}:${text}`;
+}
+
 export default function App() {
   const [open, setOpen] = useState(null);
   const [done, setDone] = useState([]);
@@ -182,8 +186,7 @@ export default function App() {
     () =>
       DATA.bots.flatMap((b) =>
         b.needsYou.map((text) => ({
-          key: `${b.name}:${text}`,
-          emoji: b.emoji,
+          key: slipKey(b.name, text),
           bot: b.name,
           text,
         })),
@@ -196,19 +199,13 @@ export default function App() {
   const toggle = (key) =>
     setDone((d) => (d.includes(key) ? d.filter((k) => k !== key) : [...d, key]));
 
-  const quiet = DATA.bots.filter((b) => b.status === "quiet").map((b) => b.name);
   const next = [...DATA.dates].sort((a, b) => a.when.localeCompare(b.when))[0];
   const parts = [];
-  if (left === 0) parts.push("You're all clear.");
+  if (left === 0) parts.push("You're all clear. Every sticky is done.");
   else if (left === 1) parts.push(`Here's everything, 1 to go: ${remaining[0].text}.`);
-  else parts.push(`Here's everything, ${left} to go.`);
-  if (quiet.length) {
-    parts.push(
-      `${quiet.join(" and ")} ${quiet.length > 1 ? "haven't" : "hasn't"} checked in yet.`,
-    );
-  }
-  if (next) {
-    parts.push(`${next.what} is ${dayWord(daysUntil(next.when, today))}. ${next.bot}'s on it.`);
+  else parts.push(`Here's everything, ${left} to go. Open a sticky to tick things off.`);
+  if (next && left > 0) {
+    parts.push(`Next up: ${next.what} ${dayWord(daysUntil(next.when, today))}.`);
   }
 
   return (
@@ -222,72 +219,76 @@ export default function App() {
         </div>
 
         <div>
-          <div className="mat-label">In tray</div>
-          <div className="tray">
-            {slips.map((s) => {
-              const isDone = done.includes(s.key);
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  className={`slip${isDone ? " slip-done" : ""}`}
-                  onClick={() => toggle(s.key)}
-                >
-                  <div className={`check${isDone ? " check-on" : ""}`}>
-                    {isDone ? "✓" : ""}
-                  </div>
-                  <div className="slip-copy">
-                    <div className={`slip-text${isDone ? " strike" : ""}`}>{s.text}</div>
-                    <div className="slip-meta">
-                      {s.emoji} {s.bot}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-            {left === 0 && (
-              <div className="tray-empty">Tray&apos;s empty. Nothing waiting on you. ☕</div>
-            )}
-          </div>
-        </div>
-
-        <div>
           <div className="mat-label">Your bots</div>
           <div className="bots-row">
             {DATA.bots.map((b, i) => {
               const isOpen = open === b.name;
+              const keys = b.needsYou.map((t) => slipKey(b.name, t));
+              const leftHere = keys.filter((k) => !done.includes(k)).length;
+              const allDone = b.needsYou.length > 0 && leftHere === 0;
+              const summary = allDone
+                ? "All clear on this note"
+                : leftHere === b.needsYou.length
+                  ? b.latest
+                  : `${leftHere} left on this note`;
+
               return (
-                <button
+                <div
                   key={b.name}
-                  type="button"
-                  className={`sticky${b.status === "quiet" ? " sticky-quiet" : ""}`}
+                  className={`sticky${allDone ? " sticky-clear" : ""}`}
                   style={{
                     background: PAPER[i % PAPER.length],
                     transform: `rotate(${isOpen ? 0 : TILT[i % TILT.length]}deg) scale(${isOpen ? 1.02 : 1})`,
+                    zIndex: isOpen ? 2 : 1,
                   }}
-                  onClick={() => setOpen(isOpen ? null : b.name)}
                 >
                   <span className="pin" aria-hidden="true" />
-                  <div className="sticky-title">
-                    {b.emoji} {b.name}
-                  </div>
-                  <div className="sticky-meta">
-                    {b.role} · {ago(b.updated, now)}
-                  </div>
-                  <div className="sticky-latest">{b.latest}</div>
-                  {b.status === "needs_you" && <Stamp color="#c0262d" label="NEEDS YOU" />}
-                  {b.status === "ok" && <Stamp color="#2f7d32" label="ALL GOOD" />}
-                  {b.status === "quiet" && <Stamp color="#6b6b6b" label="QUIET" dashed />}
+                  <button
+                    type="button"
+                    className="sticky-face"
+                    onClick={() => setOpen(isOpen ? null : b.name)}
+                    aria-expanded={isOpen}
+                  >
+                    <div className="sticky-title">
+                      {b.emoji} {b.name}
+                    </div>
+                    <div className="sticky-meta">
+                      {b.role} · {ago(b.updated, now)} · {leftHere}/{b.needsYou.length}
+                    </div>
+                    <div className="sticky-latest">{summary}</div>
+                    {allDone ? (
+                      <Stamp color="#2f7d32" label="ALL GOOD" />
+                    ) : (
+                      <Stamp color="#c0262d" label="NEEDS YOU" />
+                    )}
+                  </button>
+
                   {isOpen && (
                     <div className="sticky-detail">
                       {b.needsYou.length === 0 ? (
                         <div>Nothing needed from you.</div>
                       ) : (
-                        b.needsYou.map((n) => <div key={n}>→ {n}</div>)
+                        b.needsYou.map((n) => {
+                          const key = slipKey(b.name, n);
+                          const isDone = done.includes(key);
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              className={`sticky-item${isDone ? " sticky-item-done" : ""}`}
+                              onClick={() => toggle(key)}
+                            >
+                              <span className={`check${isDone ? " check-on" : ""}`}>
+                                {isDone ? "✓" : ""}
+                              </span>
+                              <span className={isDone ? "strike" : ""}>{n}</span>
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   )}
-                </button>
+                </div>
               );
             })}
 

@@ -60,42 +60,17 @@
   line-height: 26px;
 }
 
-.tray {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.slip {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 3px;
-  border: none;
-  text-align: left;
-  background: #fffdf6;
-  color: #2b2822;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 8px 16px rgba(0, 0, 0, 0.28);
-  cursor: pointer;
-  transition: opacity 0.2s;
-  font: inherit;
-}
-
-.slip-done {
-  opacity: 0.55;
-}
-
 .check {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 5px;
   border: 2px solid #2b2822;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
+  font-size: 12px;
   background: transparent;
 }
 
@@ -103,57 +78,31 @@
   background: #bfe8b0;
 }
 
-.slip-copy {
-  flex: 1 1 140px;
-  min-width: 0;
-}
-
-.slip-text {
-  font-family: "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
-  font-size: 17px;
-}
-
 .strike {
   text-decoration: line-through;
-}
-
-.slip-meta {
-  font-size: 12px;
   opacity: 0.65;
-}
-
-.tray-empty {
-  padding: 12px 14px;
-  border-radius: 3px;
-  background: #e6f6dc;
-  color: #2b2822;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 8px 16px rgba(0, 0, 0, 0.28);
-  font-family: "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
-  font-size: 17px;
 }
 
 .bots-row {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  align-items: flex-start;
 }
 
 .sticky {
   position: relative;
-  flex: 1 1 160px;
-  padding: 20px 14px 14px;
-  cursor: pointer;
+  flex: 1 1 180px;
+  max-width: 280px;
+  padding: 20px 12px 12px;
   color: #2b2822;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 8px 16px rgba(0, 0, 0, 0.28);
   border-radius: 2px 2px 16px 2px;
-  border: none;
-  text-align: left;
-  font: inherit;
   transition: transform 0.2s;
 }
 
-.sticky-quiet {
-  opacity: 0.8;
+.sticky-clear {
+  opacity: 0.78;
 }
 
 .pin {
@@ -166,6 +115,18 @@
   border-radius: 6px;
   background: radial-gradient(circle at 35% 30%, #ff8a8a, #b32727);
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.sticky-face {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
 }
 
 .sticky-title {
@@ -201,8 +162,34 @@
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px dashed rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sticky-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.35);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
   font-family: "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
   font-size: 15px;
+  line-height: 1.25;
+}
+
+.sticky-item:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.sticky-item-done {
+  opacity: 0.7;
 }
 
 .calendar {
